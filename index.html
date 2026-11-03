@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alliance Train Manager</title>
+<style>
+:root{color-scheme:dark;--bg:#10151d;--panel:#1a2330;--panel2:#222e3d;--line:#344356;--text:#edf3fa;--muted:#9eafc2;--gold:#f2c66d;--green:#72d6a0;--red:#ff8585;--blue:#8fc5ff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#10151d,#182536);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{max-width:1050px;margin:0 auto;padding:28px 18px 50px}.hero{text-align:center;margin-bottom:24px}.train-icon{font-size:42px}.hero h1{margin:4px 0;font-size:clamp(25px,5vw,36px);letter-spacing:.04em}.hero p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.85fr);gap:18px}.panel{background:rgba(26,35,48,.96);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 12px 32px #0002}.panel h2{font-size:18px;margin:0 0 14px}.field{display:flex;gap:8px;margin:8px 0 15px}.field input,.textarea,.select{width:100%;background:#111a25;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;outline:none}.field input:focus,.textarea:focus{border-color:var(--blue)}button{border:0;border-radius:10px;padding:10px 14px;font:600 14px system-ui;cursor:pointer;transition:.15s}button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}.primary{background:var(--blue);color:#102033}.gold{background:var(--gold);color:#30230b}.soft{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#492b32;color:#ffdadd;border:1px solid #75414b}.full{width:100%}.role{padding:13px;border:1px solid var(--line);border-radius:13px;margin:10px 0;background:#151f2b}.role-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:8px}.role small{color:var(--muted);font-weight:400}.role input{width:100%;background:#101923;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit}.vip{border-color:#8a713c}.driver{border-color:#3f765e}.count{font-size:13px;color:var(--muted);margin:8px 0 12px}.count strong{color:var(--text)}.progress{height:8px;background:#101923;border-radius:20px;overflow:hidden;margin:8px 0 17px}.progress span{display:block;height:100%;background:var(--green);width:0;transition:width .2s}.list{display:flex;flex-direction:column;gap:7px;margin-top:12px}.person{display:flex;align-items:center;gap:10px;background:#151f2b;border:1px solid #2b394a;border-radius:10px;padding:9px 10px}.num{width:25px;height:25px;display:grid;place-items:center;border-radius:7px;background:#29394b;color:var(--muted);font-size:12px;flex:none}.person-name{flex:1;overflow-wrap:anywhere}.remove{padding:5px 9px;background:transparent;color:var(--red);font-size:18px}.empty{color:var(--muted);text-align:center;padding:18px;border:1px dashed var(--line);border-radius:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.actions button{flex:1}.textarea{min-height:110px;resize:vertical}.hint{font-size:12px;color:var(--muted);margin:-8px 0 12px}.saved-item{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px;background:#151f2b;border:1px solid var(--line);border-radius:10px;margin-top:8px}.saved-name{min-width:0;overflow-wrap:anywhere}.saved-actions{display:flex;gap:5px;flex:none}.saved-actions button{padding:7px 9px}.notice{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#e6f7ed;color:#123c27;padding:10px 16px;border-radius:10px;font-weight:650;box-shadow:0 8px 24px #0005;opacity:0;pointer-events:none;transition:opacity .2s}.notice.show{opacity:1}.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:18px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.wrap{padding:20px 12px 40px}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="train-icon">🚂</div>
+    <h1>ALLIANCE TRAIN</h1>
+    <p>Менеджер пассажиров · Z Route Redemption</p>
+  </header>
+  <main class="layout">
+    <section class="panel">
+      <h2>Экипаж и пассажиры</h2>
+      <div class="role">
+        <div class="role-head"><span>🗓️ Дата и время отправления</span><small>Расписание</small></div>
+        <label for="departureDate" style="display:block;font-size:13px;color:var(--muted);margin:5px 0">Дата отправления</label>
+        <input id="departureDate" type="date" aria-label="Дата отправления поезда">
+        <label for="departureTime" style="display:block;font-size:13px;color:var(--muted);margin:10px 0 5px">Время отправления по Москве (МСК)</label>
+        <input id="departureTime" type="time" aria-label="Время отправления по Москве">
+        <label for="serverTime" style="display:block;font-size:13px;color:var(--muted);margin:10px 0 5px">Время на сервере игры</label>
+        <input id="serverTime" type="time" aria-label="Время отправления на сервере">
+      </div>
+      <div class="role driver">
+        <div class="role-head"><span>👨‍✈️ Машинист</span><small>1 место</small></div>
+        <input id="driver" maxlength="40" placeholder="Ник машиниста">
+      </div>
+      <div class="role vip">
+        <div class="role-head"><span>👑 VIP-участник</span><small>1 место</small></div>
+        <input id="vip" maxlength="40" placeholder="Ник VIP-участника">
+      </div>
+      <div class="role-head"><h2 style="margin:12px 0 0">👥 Пассажиры</h2><small id="passengerCount">0 / 24</small></div>
+      <div class="count">Всего мест: <strong id="totalCount">0 / 26</strong></div>
+      <div class="progress"><span id="progressBar"></span></div>
+      <div class="field">
+        <input id="nickname" maxlength="40" placeholder="Введи ник участника">
+        <button class="primary" id="addBtn">Добавить</button>
+      </div>
+      <textarea class="textarea" id="bulk" placeholder="Можно вставить сразу несколько ников — каждый с новой строки"></textarea>
+      <p class="hint">Пустые строки будут пропущены. Максимум 24 пассажира.</p>
+      <button class="soft full" id="bulkBtn">Добавить ники из списка</button>
+      <div class="list" id="passengers"></div>
+      <div class="actions">
+        <button class="primary" id="copyBtn">📋 Копировать список</button>
+        <button class="soft" id="clearBtn">Очистить поезд</button>
+      </div>
+    </section>
+    <aside class="panel">
+      <h2>💾 Сохранённые поезда</h2>
+      <div class="field">
+        <input id="trainName" maxlength="50" placeholder="Название, например Поезд №1">
+      </div>
+      <button class="gold full" id="saveBtn">Сохранить текущий список</button>
+      <p class="hint" style="margin:10px 0 16px">Списки хранятся в этом браузере на этом устройстве.</p>
+      <div id="savedList"></div>
+      <p class="foot">Подсказка: сначала добавь машиниста и VIP, затем пассажиров. Всего 26 мест.</p>
+    </aside>
+  </main>
+</div>
+<div class="notice" id="notice"></div>
+<script>
+const $ = id => document.getElementById(id);
+let passengers = [];
+let saved = [];
+try { passengers = JSON.parse(localStorage.getItem('allianceTrainCurrent') || '[]'); } catch(e) {}
+try { saved = JSON.parse(localStorage.getItem('allianceTrainSaved') || '[]'); } catch(e) {}
+$('driver').value = localStorage.getItem('allianceTrainDriver') || '';
+$('vip').value = localStorage.getItem('allianceTrainVip') || '';
+$('departureDate').value = localStorage.getItem('allianceTrainDepartureDate') || '';
+$('departureTime').value = localStorage.getItem('allianceTrainDepartureTime') || '';
+$('serverTime').value = localStorage.getItem('allianceTrainServerTime') || '';
+
+function persist(){
+  localStorage.setItem('allianceTrainCurrent', JSON.stringify(passengers));
+  localStorage.setItem('allianceTrainDriver', $('driver').value.trim());
+  localStorage.setItem('allianceTrainVip', $('vip').value.trim());
+  localStorage.setItem('allianceTrainDepartureDate', $('departureDate').value);
+  localStorage.setItem('allianceTrainDepartureTime', $('departureTime').value);
+  localStorage.setItem('allianceTrainServerTime', $('serverTime').value);
+}
+function notify(msg){
+  const el=$('notice'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(notify.timer); notify.timer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function addNames(names){
+  let added=0, duplicates=0;
+  for(const raw of names){
+    const name=raw.trim();
+    if(!name) continue;
+    if(passengers.length>=24) break;
+    const all=[ $('driver').value.trim(), $('vip').value.trim(), ...passengers ].filter(Boolean).map(x=>x.toLocaleLowerCase());
+    if(all.includes(name.toLocaleLowerCase())){duplicates++;continue;}
+    passengers.push(name); added++;
+  }
+  persist(); render();
+  if(added) notify(`Добавлено: ${added}`);
+  else if(duplicates) notify('Такие ники уже есть в списке');
+  else notify('Все 24 места пассажиров заняты');
+}
+function removePassenger(i){passengers.splice(i,1);persist();render();}
+function render(){
+  $('passengers').innerHTML='';
+  if(!passengers.length){$('passengers').innerHTML='<div class="empty">Пока нет пассажиров — добавь ники выше</div>';}
+  passengers.forEach((name,i)=>{
+    const row=document.createElement('div');row.className='person';
+    const num=document.createElement('span');num.className='num';num.textContent=i+1;
+    const label=document.createElement('span');label.className='person-name';label.textContent=name;
+    const del=document.createElement('button');del.className='remove';del.type='button';del.setAttribute('aria-label','Удалить '+name);del.textContent='×';del.onclick=()=>removePassenger(i);
+    row.append(num,label,del);$('passengers').append(row);
+  });
+  const used=($('driver').value.trim()?1:0)+($('vip').value.trim()?1:0)+passengers.length;
+  $('passengerCount').textContent=`${passengers.length} / 24`;
+  $('totalCount').textContent=`${used} / 26`;
+  $('progressBar').style.width=(used/26*100)+'%';
+  $('addBtn').disabled=passengers.length>=24;
+  $('bulkBtn').disabled=passengers.length>=24;
+  renderSaved();
+}
+function makeText(data){
+  const lines=['🚂 ПОЕЗД АЛЬЯНСА',''];
+  const dateText = data.departureDate
+    ? data.departureDate.split('-').reverse().join('.')
+    : 'не указана';
+  let timeText = data.departureTime || 'не указано';
+  if (data.serverTime) timeText += ' МСК/' + data.serverTime + ' сервер';
+  else timeText += ' МСК';
+  lines.push('📅 Дата отправления: '+dateText);
+  lines.push('🕒 Время отправления: '+timeText);
+  lines.push('');
+  lines.push('👨‍✈️ Машинист: '+(data.driver||'не указан'));
+  lines.push('👑 VIP: '+(data.vip||'не указан'));
+  lines.push('');
+  lines.push('👥 Пассажиры');
+  data.passengers.forEach((n,i)=>lines.push((i+1)+'. '+n));
+  lines.push('','Всего занято мест: '+((data.driver?1:0)+(data.vip?1:0)+data.passengers.length)+'/26');
+  return lines.join('\n');
+}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);notify('Список скопирован!');}
+  catch(e){
+    const t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();
+    try{document.execCommand('copy');notify('Список скопирован!');}catch(err){notify('Не удалось скопировать — выдели текст вручную');}
+    t.remove();
+  }
+}
+function currentData(){return {departureDate:$('departureDate').value,departureTime:$('departureTime').value,serverTime:$('serverTime').value,driver:$('driver').value.trim(),vip:$('vip').value.trim(),passengers:[...passengers]};}
+function renderSaved(){
+  $('savedList').innerHTML='';
+  if(!saved.length){$('savedList').innerHTML='<div class="empty">Сохранённых поездов пока нет</div>';return;}
+  saved.forEach((item,i)=>{
+    const row=document.createElement('div');row.className='saved-item';
+    const name=document.createElement('span');name.className='saved-name';name.textContent=item.name;
+    const actions=document.createElement('div');actions.className='saved-actions';
+    const load=document.createElement('button');load.className='soft';load.textContent='Открыть';load.onclick=()=>{
+      $('departureDate').value=item.data.departureDate||'';$('departureTime').value=item.data.departureTime||'';$('serverTime').value=item.data.serverTime||'';$('driver').value=item.data.driver||'';$('vip').value=item.data.vip||'';passengers=[...item.data.passengers];persist();render();notify('Список загружен');
+    };
+    const copy=document.createElement('button');copy.className='soft';copy.textContent='Копия';copy.title='Скопировать';copy.onclick=()=>copyText(makeText(item.data));
+    const del=document.createElement('button');del.className='danger';del.textContent='×';del.title='Удалить сохранение';del.onclick=()=>{
+      if(confirm('Удалить сохранённый поезд «'+item.name+'»?')){saved.splice(i,1);localStorage.setItem('allianceTrainSaved',JSON.stringify(saved));renderSaved();}
+    };
+    actions.append(load,copy,del);row.append(name,actions);$('savedList').append(row);
+  });
+}
+$('addBtn').onclick=()=>{addNames([$('nickname').value]);$('nickname').value='';};
+$('nickname').addEventListener('keydown',e=>{if(e.key==='Enter')$('addBtn').click();});
+$('bulkBtn').onclick=()=>{addNames($('bulk').value.split(/\r?\n/));$('bulk').value='';};
+$('driver').addEventListener('input',()=>{persist();render();});
+$('vip').addEventListener('input',()=>{persist();render();});
+$('departureDate').addEventListener('input',persist);$('departureTime').addEventListener('input',persist);$('serverTime').addEventListener('input',persist);
+$('copyBtn').onclick=()=>copyText(makeText(currentData()));
+$('clearBtn').onclick=()=>{
+  if(confirm('Очистить текущий поезд? Сохранённые списки не будут удалены.')){
+    passengers=[];$('departureDate').value='';$('departureTime').value='';$('serverTime').value='';$('driver').value='';$('vip').value='';persist();render();notify('Текущий поезд очищен');
+  }
+};
+$('saveBtn').onclick=()=>{
+  const name=$('trainName').value.trim()||`Поезд ${saved.length+1}`;
+  const data=currentData();
+  if(!data.driver&&!data.vip&&!data.passengers.length){notify('Сначала добавь участников');return;}
+  saved.unshift({name,data,created:Date.now()});
+  localStorage.setItem('allianceTrainSaved',JSON.stringify(saved));
+  $('trainName').value='';renderSaved();notify('Поезд сохранён');
+};
+render();
+</script>
+</body>
+</html>
